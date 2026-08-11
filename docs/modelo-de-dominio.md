@@ -79,8 +79,8 @@ class Branch {
   +string address
   +string openingHours
   +string phone
-  +decimal latitude
-  +decimal longitude
+  +decimal latitude [optional]
+  +decimal longitude [optional]
   +boolean isActive
 }
 
@@ -115,8 +115,6 @@ class ScheduledClass {
   +UUID trainerId
   +string activity
   +datetime startsAt
-  +datetime endsAt
-  +boolean isCancelled
 }
 
 class TrainerBranch {
@@ -138,7 +136,7 @@ User "1" *-- "0..1" TrainerProfile : has
 MemberProfile "1" --> "0..*" Payment : owns
 MemberProfile "1" --> "0..*" MedicalCertificate : uploads
 User "1" --> "0..*" AccessLog : attempts
-Branch "1" *-- "1..*" AccessPoint : contains
+Branch "1" *-- "0..*" AccessPoint : contains
 AccessPoint "1" --> "0..*" AccessLog : records
 WeeklySchedule "1" *-- "0..*" ScheduledClass : contains
 WeeklySchedule "0..1" --> "0..*" WeeklySchedule : copied into
@@ -169,7 +167,6 @@ class Event {
   +string title
   +string description
   +datetime startsAt
-  +datetime endsAt
   +string location
   +string imageUrl
   +EventStatus status
@@ -292,15 +289,17 @@ class NotificationType {
 - El estado de la cuota se calcula en el backend a partir del último pago acreditado: `CURRENT`, `EXPIRING_SOON` o `EXPIRED`.
 - `expiresAt` se fija en 30 días desde `accreditedAt`; un pago nuevo reemplaza la vigencia anterior y no acumula días.
 - Durante los primeros 20 días desde el primer pago acreditado, un socio puede ingresar sin apto aprobado.
+- Un apto aprobado permanece vigente sin fecha de vencimiento.
 - Un entrenador no necesita cuota ni apto médico para ingresar, pero su cuenta debe estar activa.
 - Desactivar entidades conserva sus relaciones e historial.
 - Los estados `UPCOMING` y `FINISHED` de un evento se derivan de la fecha; `CANCELLED` sí se persiste.
+- El usuario se identifica mediante su sesión y escanea el QR fijo de un `AccessPoint`; no existe un QR personal por usuario.
+- Las clases son informativas: no incluyen reservas, cupos, listas de espera ni control de asistencia.
 
 ## Decisiones pendientes de validación
 
 1. Confirmar los medios de pago aceptados por M-Team.
-2. Confirmar si una clase tiene duración explícita o solamente día y hora de inicio.
-3. Definir si los eventos se vinculan opcionalmente con una sede además de admitir una ubicación libre.
-4. Definir si debe conservarse cada versión de un apto rechazado; el modelo actual conserva todas las cargas.
-5. Determinar si los administradores necesitan un perfil propio o si los datos de `User` son suficientes.
-
+2. Definir si los eventos se vinculan opcionalmente con una sede además de admitir una ubicación libre.
+3. Definir si debe conservarse cada versión de un apto rechazado; el modelo actual conserva todas las cargas.
+4. Determinar si los administradores necesitan un perfil propio o si los datos de `User` son suficientes.
+5. Definir qué sucede con el período inicial de 20 días cuando el primer pago acreditado es anulado.
