@@ -64,11 +64,11 @@ Esta matriz vincula los requerimientos funcionales del documento de alcance con 
 | Requisito | Clases o reglas relacionadas | Cobertura | Observación |
 |---|---|---|---|
 | ACC-01 | `User`, `AccessPoint` | Aplicación | El usuario autenticado escanea el QR fijo con la cámara. |
-| ACC-02 | `AccessPoint.qrToken`, `Branch` | Cubierto | El token debe ser único y no predecible; se valida el estado del punto. |
+| ACC-02 | `AccessPoint.qrToken`, `Branch`, `AccessLog` | Cubierto | Un QR inexistente o alterado se rechaza y registra como `INVALID_QR`, sin sede ni punto asociados. |
 | ACC-03 | `User`, `UserStatus` | Aplicación | La identidad procede de la sesión, nunca del QR. |
 | ACC-04 | `User`, `Payment`, `MedicalCertificate`, `AccessLog` | Aplicación | Las reglas cambian según el rol y se validan con datos vigentes. |
-| ACC-05 | `AccessLog`, `AccessResult`, `AccessDenialReason` | Cubierto | Resultado y motivo pueden devolverse inmediatamente. |
-| ACC-06 | `AccessLog`, `User`, `AccessPoint`, `Branch` | Cubierto | `roleAtAttempt` y `branchId` conservan el contexto histórico del intento. |
+| ACC-05 | `AccessLog`, `AccessResult`, `AccessDenialReason` | Cubierto | Incluye el motivo `INVALID_QR` además de los rechazos asociados con cuenta, cuota, apto, sede o punto. |
+| ACC-06 | `AccessLog`, `User`, `AccessPoint`, `Branch` | Cubierto | `roleAtAttempt` conserva el rol histórico; sede y punto se conservan cuando el QR permite identificarlos. |
 | ACC-07 | `AccessLog` y relaciones | Aplicación | Historial y filtros se implementan mediante consultas paginadas. |
 | ACC-08 | Sin clase adicional | Aplicación | Permisos y errores de cámara corresponden al frontend. |
 

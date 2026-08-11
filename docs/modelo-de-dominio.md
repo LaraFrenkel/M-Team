@@ -51,7 +51,7 @@ class Payment {
   +UUID id
   +UUID memberId
   +decimal amount
-  +PaymentMethod method
+  +string method
   +string receiptNumber
   +PaymentStatus status
   +UUID createdById
@@ -100,8 +100,8 @@ class AccessLog {
   +UUID id
   +UUID userId
   +UserRole roleAtAttempt
-  +UUID branchId
-  +UUID accessPointId
+  +UUID branchId [optional]
+  +UUID accessPointId [optional]
   +AccessResult result
   +AccessDenialReason denialReason
   +datetime attemptedAt
@@ -143,8 +143,8 @@ MemberProfile "1" --> "0..*" Payment : owns
 MemberProfile "1" --> "0..*" MedicalCertificate : uploads
 User "1" --> "0..*" AccessLog : attempts
 Branch "1" *-- "0..*" AccessPoint : contains
-Branch "1" --> "0..*" AccessLog : receives
-AccessPoint "1" --> "0..*" AccessLog : records
+Branch "0..1" --> "0..*" AccessLog : receives
+AccessPoint "0..1" --> "0..*" AccessLog : records
 WeeklySchedule "1" *-- "0..*" ScheduledClass : contains
 WeeklySchedule "0..1" --> "0..*" WeeklySchedule : copied into
 Branch "1" --> "0..*" ScheduledClass : hosts
@@ -226,14 +226,6 @@ class PaymentStatus {
   ACCREDITED
   VOIDED
 }
-class PaymentMethod {
-  <<enumeration>>
-  CASH
-  BANK_TRANSFER
-  DEBIT_CARD
-  CREDIT_CARD
-  OTHER
-}
 class MedicalCertificateStatus {
   <<enumeration>>
   PENDING
@@ -247,6 +239,7 @@ class AccessResult {
 }
 class AccessDenialReason {
   <<enumeration>>
+  INVALID_QR
   INACTIVE_USER
   INACTIVE_BRANCH
   INACTIVE_ACCESS_POINT
@@ -303,6 +296,7 @@ class NotificationType {
 - Desactivar entidades conserva sus relaciones e historial.
 - Los estados `UPCOMING` y `FINISHED` de un evento se derivan de la fecha; `CANCELLED` sí se persiste.
 - El usuario se identifica mediante su sesión y escanea el QR fijo de un `AccessPoint`; no existe un QR personal por usuario.
+- Si el QR es inexistente o fue alterado, el intento se registra con motivo `INVALID_QR` y sin sede ni punto de acceso asociados.
 - Las clases son informativas: no incluyen reservas, cupos, listas de espera ni control de asistencia.
 
 ## Decisiones pendientes de validación

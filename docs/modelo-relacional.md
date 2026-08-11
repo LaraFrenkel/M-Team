@@ -98,8 +98,8 @@ erDiagram
         uuid id PK
         uuid user_id FK
         user_role role_at_attempt
-        uuid branch_id FK
-        uuid access_point_id FK
+        uuid branch_id FK "nullable"
+        uuid access_point_id FK "nullable"
         access_result result
         access_denial_reason denial_reason
         timestamptz attempted_at
@@ -176,8 +176,8 @@ erDiagram
     users ||--o{ medical_certificates : "reviews"
     branches ||--o{ access_points : "contains"
     users ||--o{ access_logs : "attempts"
-    branches ||--o{ access_logs : "receives"
-    access_points ||--o{ access_logs : "records"
+    branches o|--o{ access_logs : "receives"
+    access_points o|--o{ access_logs : "records"
     weekly_schedules o|--o{ weekly_schedules : "copied into"
     weekly_schedules ||--o{ scheduled_classes : "contains"
     branches ||--o{ scheduled_classes : "hosts"
@@ -199,7 +199,7 @@ erDiagram
 | `payment_status` | `ACCREDITED`, `VOIDED` |
 | `medical_certificate_status` | `PENDING`, `APPROVED`, `REJECTED` |
 | `access_result` | `ALLOWED`, `DENIED` |
-| `access_denial_reason` | `INACTIVE_USER`, `INACTIVE_BRANCH`, `INACTIVE_ACCESS_POINT`, `EXPIRED_MEMBERSHIP`, `MEDICAL_CERTIFICATE_REQUIRED` |
+| `access_denial_reason` | `INVALID_QR`, `INACTIVE_USER`, `INACTIVE_BRANCH`, `INACTIVE_ACCESS_POINT`, `EXPIRED_MEMBERSHIP`, `MEDICAL_CERTIFICATE_REQUIRED` |
 | `user_audit_action` | `CREATED`, `UPDATED`, `ACTIVATED`, `DEACTIVATED`, `PASSWORD_RESET` |
 | `event_status` | `DRAFT`, `PUBLISHED`, `CANCELLED` |
 | `publication_audience` | `ALL`, `MEMBERS`, `TRAINERS` |
@@ -219,6 +219,7 @@ El medio de pago permanece como `varchar` validado por la aplicación hasta que 
 - Un apto aprobado requiere responsable y fecha de revisión, pero no fecha de vencimiento.
 - `branches.name`, `branches.address` y `access_points.qr_token` son únicos.
 - `access_logs.denial_reason` es obligatorio solamente cuando `result = DENIED`.
+- `access_logs.branch_id` y `access_logs.access_point_id` pueden ser nulos solamente cuando el QR es inexistente o fue alterado y el motivo es `INVALID_QR`.
 - `weekly_schedules.week_starts_on` debe representar siempre el comienzo acordado de una semana y ser único.
 - `trainer_branches` utiliza una clave primaria compuesta para evitar asignaciones duplicadas.
 - Los registros históricos no se eliminan al desactivar usuarios, entrenadores, sedes o puntos de acceso.
