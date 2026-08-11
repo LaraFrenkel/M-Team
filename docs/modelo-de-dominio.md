@@ -54,9 +54,11 @@ class Payment {
   +PaymentMethod method
   +string receiptNumber
   +PaymentStatus status
+  +UUID createdById
+  +datetime createdAt
+  +UUID confirmedById
   +datetime accreditedAt
   +datetime expiresAt
-  +UUID accreditedById
   +UUID voidedById
   +datetime voidedAt
   +string voidReason
@@ -76,6 +78,8 @@ class MedicalCertificate {
 class Branch {
   +UUID id
   +string name
+  +string description
+  +string imageUrl
   +string address
   +string openingHours
   +string phone
@@ -95,6 +99,8 @@ class AccessPoint {
 class AccessLog {
   +UUID id
   +UUID userId
+  +UserRole roleAtAttempt
+  +UUID branchId
   +UUID accessPointId
   +AccessResult result
   +AccessDenialReason denialReason
@@ -137,6 +143,7 @@ MemberProfile "1" --> "0..*" Payment : owns
 MemberProfile "1" --> "0..*" MedicalCertificate : uploads
 User "1" --> "0..*" AccessLog : attempts
 Branch "1" *-- "0..*" AccessPoint : contains
+Branch "1" --> "0..*" AccessLog : receives
 AccessPoint "1" --> "0..*" AccessLog : records
 WeeklySchedule "1" *-- "0..*" ScheduledClass : contains
 WeeklySchedule "0..1" --> "0..*" WeeklySchedule : copied into
@@ -147,7 +154,7 @@ Branch "1" --> "0..*" TrainerBranch : has trainers
 User "1" --> "0..*" UserAuditLog : is audited
 User "1" --> "0..*" UserAuditLog : performs
 User "1" --> "0..*" MembershipPrice : creates
-User "1" --> "0..*" Payment : accredits or voids
+User "1" --> "0..*" Payment : creates confirms or voids
 User "1" --> "0..*" MedicalCertificate : reviews
 ```
 
@@ -288,6 +295,8 @@ class NotificationType {
 
 - El estado de la cuota se calcula en el backend a partir del último pago acreditado: `CURRENT`, `EXPIRING_SOON` o `EXPIRED`.
 - `expiresAt` se fija en 30 días desde `accreditedAt`; un pago nuevo reemplaza la vigencia anterior y no acumula días.
+- Si se anula un pago, la vigencia se recalcula utilizando el pago acreditado más reciente que continúe válido.
+- Si el pago anulado era el primer pago válido, el período inicial de 20 días se recalcula desde la acreditación válida más antigua que permanezca registrada.
 - Durante los primeros 20 días desde el primer pago acreditado, un socio puede ingresar sin apto aprobado.
 - Un apto aprobado permanece vigente sin fecha de vencimiento.
 - Un entrenador no necesita cuota ni apto médico para ingresar, pero su cuenta debe estar activa.
@@ -299,7 +308,5 @@ class NotificationType {
 ## Decisiones pendientes de validación
 
 1. Confirmar los medios de pago aceptados por M-Team.
-2. Definir si los eventos se vinculan opcionalmente con una sede además de admitir una ubicación libre.
-3. Definir si debe conservarse cada versión de un apto rechazado; el modelo actual conserva todas las cargas.
-4. Determinar si los administradores necesitan un perfil propio o si los datos de `User` son suficientes.
-5. Definir qué sucede con el período inicial de 20 días cuando el primer pago acreditado es anulado.
+
+Por cumplimiento estricto del alcance, los eventos utilizan una ubicación libre y no se vinculan con una sede. Cada nueva carga de un apto rechazado se conserva en el historial, como establece APM-07. Los administradores utilizan los datos comunes de `User`, ya que el alcance no define atributos adicionales para un perfil administrativo.

@@ -44,7 +44,7 @@ Esta matriz vincula los requerimientos funcionales del documento de alcance con 
 | PAG-03 | `Payment`, `PaymentStatus` | Cubierto | Conserva estado y vencimiento generado, incluso al anularse. |
 | PAG-04 | `Payment`, `User` | Aplicación | Los filtros se implementan en el repositorio/API. |
 | PAG-05 | `Payment`, `PaymentStatus` | Cubierto | Se conserva el pago anulado y se recalcula desde pagos válidos. |
-| PAG-06 | `Payment`, `User` | **Parcial** | Faltan representación separada de creador/fecha de creación y confirmador/fecha de confirmación. |
+| PAG-06 | `Payment`, `User` | Cubierto | Se registran por separado creación, confirmación y anulación, con sus responsables y fechas. |
 | PAG-07 | `Payment`, `PaymentStatus` | Aplicación | Total por rango calculado solamente con pagos acreditados. |
 
 ## Aptos médicos
@@ -68,7 +68,7 @@ Esta matriz vincula los requerimientos funcionales del documento de alcance con 
 | ACC-03 | `User`, `UserStatus` | Aplicación | La identidad procede de la sesión, nunca del QR. |
 | ACC-04 | `User`, `Payment`, `MedicalCertificate`, `AccessLog` | Aplicación | Las reglas cambian según el rol y se validan con datos vigentes. |
 | ACC-05 | `AccessLog`, `AccessResult`, `AccessDenialReason` | Cubierto | Resultado y motivo pueden devolverse inmediatamente. |
-| ACC-06 | `AccessLog`, `User`, `AccessPoint`, `Branch` | **Parcial** | Conviene conservar `roleAtAttempt` y `branchId` como datos históricos del intento. |
+| ACC-06 | `AccessLog`, `User`, `AccessPoint`, `Branch` | Cubierto | `roleAtAttempt` y `branchId` conservan el contexto histórico del intento. |
 | ACC-07 | `AccessLog` y relaciones | Aplicación | Historial y filtros se implementan mediante consultas paginadas. |
 | ACC-08 | Sin clase adicional | Aplicación | Permisos y errores de cámara corresponden al frontend. |
 
@@ -76,10 +76,10 @@ Esta matriz vincula los requerimientos funcionales del documento de alcance con 
 
 | Requisito | Clases o reglas relacionadas | Cobertura | Observación |
 |---|---|---|---|
-| SED-01 | `Branch` | **Parcial** | Faltan `imageUrl` y `description`. |
-| SED-02 | `Branch`, `ScheduledClass` | **Parcial** | Depende de agregar descripción e imagen; las clases ya están relacionadas. |
+| SED-01 | `Branch` | Cubierto | Incluye nombre, imagen, dirección, horarios, teléfono y descripción. |
+| SED-02 | `Branch`, `ScheduledClass` | Cubierto | El detalle dispone de los datos de la sede y sus clases programadas. |
 | SED-03 | `Branch.latitude`, `Branch.longitude` | Cubierto | Las coordenadas son opcionales; la información principal sigue disponible sin Maps. |
-| SED-04 | `Branch`, `User` | **Parcial** | Faltan imagen y descripción; nombre y dirección deberán ser únicos. |
+| SED-04 | `Branch`, `User` | Cubierto | Nombre y dirección deberán tener restricciones únicas. |
 | SED-05 | `Branch.isActive`, `ScheduledClass` | Cubierto | La regla impide nuevas asignaciones y conserva el historial. |
 | SED-06 | `Branch` y relaciones | Aplicación | Búsqueda y filtros corresponden a consultas administrativas. |
 | CLA-01 | `WeeklySchedule`, `ScheduledClass`, `Branch`, `TrainerProfile` | Cubierto | El cronograma es informativo. |
@@ -110,13 +110,13 @@ Esta matriz vincula los requerimientos funcionales del documento de alcance con 
 | PAN-03 | `WeeklySchedule`, `ScheduledClass` | Aplicación | Se consulta la semana actual y la existencia de la siguiente. |
 | PAN-04 | `AccessLog`, `User`, `AccessPoint`, `Branch` | Aplicación | El resumen se obtiene de los intentos más recientes. |
 
-## Brechas encontradas
+## Brechas resueltas en el modelo
 
-Antes de derivar el modelo relacional se deben resolver estas brechas:
+La revisión de trazabilidad permitió resolver estas brechas antes de derivar el modelo relacional:
 
-1. Agregar `imageUrl` y `description` a `Branch` para SED-01, SED-02 y SED-04.
-2. Completar la trazabilidad de `Payment` exigida por PAG-06, diferenciando creación, confirmación y anulación.
-3. Conservar en `AccessLog` el rol utilizado y la sede correspondiente al momento del intento, como exige ACC-06.
-4. Incorporar expresamente la regla de PAG-05: si se anula el primer pago, el período inicial se recalcula desde la acreditación válida más antigua.
+1. Se agregaron `imageUrl` y `description` a `Branch` para SED-01, SED-02 y SED-04.
+2. Se completó la trazabilidad de `Payment` exigida por PAG-06, diferenciando creación, confirmación y anulación.
+3. `AccessLog` conserva el rol utilizado y la sede correspondiente al momento del intento, como exige ACC-06.
+4. Se incorporó la regla de PAG-05: si se anula el primer pago, el período inicial se recalcula desde la acreditación válida más antigua.
 
 Ninguna de estas brechas requiere incorporar reservas, cupos, asistencias, beneficios, referidos, evaluaciones ni un QR personal.
